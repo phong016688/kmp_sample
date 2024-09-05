@@ -10,40 +10,27 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.github.jetbrains.rssreader.app.FeedAction
-import com.github.jetbrains.rssreader.app.FeedStore
+import com.github.jetbrains.rssreader.app.CurrencyStore
+import com.github.jetbrains.rssreader.core.entity.Currency
 import com.github.jetbrains.rssreader.core.entity.Feed
-import com.github.jetbrains.rssreader.core.entity.Post
-import kotlinx.coroutines.launch
 
 @Composable
 fun MainFeed(
-    store: FeedStore,
-    onPostClick: (Post) -> Unit,
-    onEditClick: () -> Unit,
+    store: CurrencyStore,
+    onPostClick: (Currency) -> Unit,
 ) {
     val state = store.observeState().collectAsState()
-    val posts = remember(state.value.feeds, state.value.selectedFeed) {
-        (state.value.selectedFeed?.posts ?: state.value.feeds.flatMap { it.posts })
-            .sortedByDescending { it.date }
+    val currencies = remember(state.value.currencies) {
+        state.value.currencies
     }
     Column {
         val coroutineScope = rememberCoroutineScope()
         val listState = rememberLazyListState()
         PostList(
             modifier = Modifier.weight(1f),
-            posts = posts,
+            currencies = currencies,
             listState = listState
-        ) { post -> onPostClick(post) }
-        MainFeedBottomBar(
-            feeds = state.value.feeds,
-            selectedFeed = state.value.selectedFeed,
-            onFeedClick = { feed ->
-                coroutineScope.launch { listState.scrollToItem(0) }
-                store.dispatch(FeedAction.SelectFeed(feed))
-            },
-            onEditClick = onEditClick
-        )
+        ) { currency -> onPostClick(currency) }
         Spacer(
             Modifier
                 .windowInsetsBottomHeight(WindowInsets.navigationBars)
@@ -81,11 +68,13 @@ fun MainFeedBottomBar(
                     isSelected = selectedFeed == null,
                     onClick = { onFeedClick(null) }
                 )
+
                 is Icons.FeedIcon -> FeedIcon(
                     feed = item.feed,
                     isSelected = selectedFeed == item.feed,
                     onClick = { onFeedClick(item.feed) }
                 )
+
                 is Icons.Edit -> EditIcon(onClick = onEditClick)
             }
             Spacer(modifier = Modifier.size(16.dp))

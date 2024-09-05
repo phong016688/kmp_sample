@@ -1,5 +1,6 @@
 package com.github.jetbrains.rssreader.androidApp
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -13,19 +14,21 @@ import androidx.compose.ui.Modifier
 import cafe.adriel.voyager.navigator.Navigator
 import com.github.jetbrains.rssreader.androidApp.composeui.AppTheme
 import com.github.jetbrains.rssreader.androidApp.composeui.MainScreen
+import com.github.jetbrains.rssreader.app.CurrencyStore
 import com.github.jetbrains.rssreader.app.FeedSideEffect
 import com.github.jetbrains.rssreader.app.FeedStore
 import kotlinx.coroutines.flow.*
 import org.koin.android.ext.android.inject
 
 class AppActivity : ComponentActivity() {
+    @SuppressLint("UnusedMaterialScaffoldPaddingParameter")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
             AppTheme {
-                val store: FeedStore by inject()
+                val currencyStore: CurrencyStore by inject()
                 val scaffoldState = rememberScaffoldState()
-                val error = store.observeSideEffect()
+                val error = currencyStore.observeSideEffect()
                     .filterIsInstance<FeedSideEffect.Error>()
                     .collectAsState(null)
                 LaunchedEffect(error.value) {

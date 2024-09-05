@@ -1,7 +1,5 @@
 package com.github.jetbrains.rssreader.androidApp.composeui
 
-import android.content.Intent
-import android.net.Uri
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.material.ExperimentalMaterialApi
@@ -18,37 +16,36 @@ import androidx.compose.ui.platform.LocalContext
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
-import com.github.jetbrains.rssreader.app.FeedAction
+import com.github.jetbrains.rssreader.app.CurrencyAction
+import com.github.jetbrains.rssreader.app.CurrencyStore
 import com.github.jetbrains.rssreader.app.FeedStore
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
 class MainScreen : Screen, KoinComponent {
+    private val symbol = "BTCUSDT"
+    private val interval = 4
+
     @OptIn(ExperimentalMaterialApi::class)
     @Composable
     override fun Content() {
-        val store: FeedStore by inject()
+        val currencyStore: CurrencyStore by inject()
         val context = LocalContext.current
         val navigator = LocalNavigator.currentOrThrow
-        val state by store.observeState().collectAsState()
+        val state by currencyStore.observeState().collectAsState()
         val refreshState = rememberPullRefreshState(
             refreshing = state.progress,
-            onRefresh = { store.dispatch(FeedAction.Refresh(true)) }
+            onRefresh = { currencyStore.dispatch(CurrencyAction.Refresh(symbol, interval)) }
         )
 
         LaunchedEffect(Unit) {
-            store.dispatch(FeedAction.Refresh(false))
+            currencyStore.dispatch(CurrencyAction.Refresh(symbol, interval))
         }
         Box(modifier = Modifier.pullRefresh(refreshState)) {
             MainFeed(
-                store = store,
-                onPostClick = { post ->
-                    post.link?.let { url ->
-                        context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
-                    }
-                },
-                onEditClick = {
-                    navigator.push(FeedListScreen())
+                store = currencyStore,
+                onPostClick = { currency ->
+
                 }
             )
             PullRefreshIndicator(

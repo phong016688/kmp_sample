@@ -1,6 +1,5 @@
 package com.github.jetbrains.rssreader.androidApp.composeui
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -11,81 +10,95 @@ import androidx.compose.material.Card
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import coil.compose.rememberAsyncImagePainter
-import com.github.jetbrains.rssreader.core.entity.Post
+import com.github.jetbrains.rssreader.core.entity.Currency
 import java.text.SimpleDateFormat
-import java.util.*
+import java.util.Date
+import java.util.Locale
 
 @Composable
 fun PostList(
     modifier: Modifier,
-    posts: List<Post>,
+    currencies: List<Currency>,
     listState: LazyListState,
-    onClick: (Post) -> Unit
+    onClick: (Currency) -> Unit
 ) {
     LazyColumn(
         modifier = modifier,
         contentPadding = PaddingValues(16.dp),
         state = listState
     ) {
-        itemsIndexed(posts) { i, post ->
+        itemsIndexed(currencies) { i, currency ->
             if (i == 0) Spacer(Modifier.windowInsetsTopHeight(WindowInsets.statusBars))
-            PostItem(post) { onClick(post) }
-            if (i != posts.size - 1) Spacer(modifier = Modifier.size(16.dp))
+            PostItem(currency) { onClick(currency) }
+            if (i != currencies.size - 1) Spacer(modifier = Modifier.size(16.dp))
         }
     }
 }
 
-private val dateFormatter = SimpleDateFormat("dd MMMM yyyy", Locale.getDefault())
+private val dateFormatter = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
 
 @Composable
 fun PostItem(
-    item: Post,
+    item: Currency,
     onClick: () -> Unit
 ) {
-    val padding = 16.dp
+    val padding = 8.dp
     Box {
         Card(
             elevation = 16.dp,
             shape = RoundedCornerShape(padding)
         ) {
             Column(
-                modifier = Modifier.clickable(onClick = onClick)
+                modifier = Modifier
+                    .clickable(onClick = onClick)
+                    .fillMaxWidth()
             ) {
                 Spacer(modifier = Modifier.size(padding))
-                Text(
-                    modifier = Modifier.padding(start = padding, end = padding),
-                    style = MaterialTheme.typography.h6,
-                    text = item.title
-                )
-                item.imageUrl?.let { url ->
-                    Spacer(modifier = Modifier.size(padding))
-                    Image(
-                        painter = rememberAsyncImagePainter(url),
-                        modifier = Modifier.height(180.dp).fillMaxWidth(),
-                        contentDescription = null
-                    )
-                }
-                item.desc?.let { desc ->
-                    Spacer(modifier = Modifier.size(padding))
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
                     Text(
                         modifier = Modifier.padding(start = padding, end = padding),
                         style = MaterialTheme.typography.body1,
-                        maxLines = 5,
+                        maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
-                        text = desc
+                        text = dateFormatter.format(Date(item.openTime))
+                    )
+                    Text(
+                        modifier = Modifier.padding(start = padding, end = padding),
+                        style = MaterialTheme.typography.body1,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        text = dateFormatter.format(Date(item.closeTime))
                     )
                 }
                 Spacer(modifier = Modifier.size(padding))
-                Text(
-                    modifier = Modifier.padding(start = padding, end = padding),
-                    style = MaterialTheme.typography.body2,
-                    color = MaterialTheme.colors.onSurface.copy(alpha = 0.7f),
-                    text = dateFormatter.format(Date(item.date))
-                )
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        modifier = Modifier.padding(start = padding, end = padding),
+                        style = MaterialTheme.typography.h6,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        text = item.openPrice.toString()
+                    )
+                    Text(
+                        modifier = Modifier.padding(start = padding, end = padding),
+                        style = MaterialTheme.typography.h6,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        text = item.closePrice.toString()
+                    )
+                }
                 Spacer(modifier = Modifier.size(padding))
             }
         }

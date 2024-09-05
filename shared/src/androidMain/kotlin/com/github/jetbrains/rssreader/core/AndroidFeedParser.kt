@@ -5,39 +5,39 @@ import com.github.jetbrains.rssreader.core.datasource.network.FeedParser
 import com.github.jetbrains.rssreader.core.entity.Feed
 import com.github.jetbrains.rssreader.core.entity.Post
 import io.github.aakira.napier.Napier
-import io.ktor.http.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.xmlpull.v1.XmlPullParser
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
-import java.util.*
+import java.util.Locale
 
 internal class AndroidFeedParser : FeedParser {
     private val dateFormat = DateTimeFormatter.ofPattern("EEE, dd MMM yyyy HH:mm:ss Z", Locale.US)
 
-    override suspend fun parse(sourceUrl: String, xml: String, isDefault: Boolean): Feed = withContext(Dispatchers.IO) {
-        val parser = Xml.newPullParser().apply {
-            setFeature(XmlPullParser.FEATURE_PROCESS_NAMESPACES, false)
-        }
-
-        var feed: Feed
-
-        xml.reader().use { reader ->
-            parser.setInput(reader)
-
-            var tag = parser.nextTag()
-            while (tag != XmlPullParser.START_TAG && parser.name != "rss") {
-                skip(parser)
-                tag = parser.next()
+    override suspend fun parse(sourceUrl: String, xml: String, isDefault: Boolean): Feed =
+        withContext(Dispatchers.IO) {
+            val parser = Xml.newPullParser().apply {
+                setFeature(XmlPullParser.FEATURE_PROCESS_NAMESPACES, false)
             }
-            parser.nextTag()
 
-            feed = readFeed(sourceUrl, parser, isDefault)
+            var feed: Feed
+
+            xml.reader().use { reader ->
+                parser.setInput(reader)
+
+                var tag = parser.nextTag()
+                while (tag != XmlPullParser.START_TAG && parser.name != "rss") {
+                    skip(parser)
+                    tag = parser.next()
+                }
+                parser.nextTag()
+
+                feed = readFeed(sourceUrl, parser, isDefault)
+            }
+
+            return@withContext feed
         }
-
-        return@withContext feed
-    }
 
     private fun readFeed(sourceUrl: String, parser: XmlPullParser, isDefault: Boolean): Feed {
         parser.require(XmlPullParser.START_TAG, null, "channel")

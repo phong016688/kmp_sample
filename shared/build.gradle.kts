@@ -39,6 +39,10 @@ kotlin {
             implementation(libs.multiplatform.settings)
             // DI
             api(libs.koin.core)
+            // Date format
+            implementation(libs.kotlinx.datetime)
+            implementation(libs.ktor.client.content.negotiation)
+            implementation(libs.ktor.serialization.kotlinx.json)
         }
 
         androidMain.dependencies {
