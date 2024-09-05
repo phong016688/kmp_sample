@@ -5,6 +5,7 @@ import com.github.jetbrains.rssreader.core.entity.Feed
 import io.github.aakira.napier.Napier
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -56,6 +57,7 @@ class FeedStore(
                     oldState.copy(progress = true)
                 }
             }
+
             is FeedAction.Add -> {
                 if (oldState.progress) {
                     launch { sideEffect.emit(FeedSideEffect.Error(Exception("In progress"))) }
@@ -65,6 +67,7 @@ class FeedStore(
                     FeedState(true, oldState.feeds)
                 }
             }
+
             is FeedAction.Delete -> {
                 if (oldState.progress) {
                     launch { sideEffect.emit(FeedSideEffect.Error(Exception("In progress"))) }
@@ -74,6 +77,7 @@ class FeedStore(
                     FeedState(true, oldState.feeds)
                 }
             }
+
             is FeedAction.SelectFeed -> {
                 if (action.feed == null || oldState.feeds.contains(action.feed)) {
                     oldState.copy(selectedFeed = action.feed)
@@ -82,6 +86,7 @@ class FeedStore(
                     oldState
                 }
             }
+
             is FeedAction.Data -> {
                 if (oldState.progress) {
                     val selected = oldState.selectedFeed?.let {
@@ -93,6 +98,7 @@ class FeedStore(
                     oldState
                 }
             }
+
             is FeedAction.Error -> {
                 if (oldState.progress) {
                     launch { sideEffect.emit(FeedSideEffect.Error(action.error)) }

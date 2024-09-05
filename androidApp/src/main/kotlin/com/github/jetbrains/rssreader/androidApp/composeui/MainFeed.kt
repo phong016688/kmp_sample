@@ -11,25 +11,28 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.github.jetbrains.rssreader.app.CurrencyStore
-import com.github.jetbrains.rssreader.core.entity.Currency
+import com.github.jetbrains.rssreader.core.entity.CompressResult
 import com.github.jetbrains.rssreader.core.entity.Feed
 
 @Composable
 fun MainFeed(
     store: CurrencyStore,
-    onPostClick: (Currency) -> Unit,
+    onPostClick: (CompressResult) -> Unit,
 ) {
     val state = store.observeState().collectAsState()
-    val currencies = remember(state.value.currencies) {
-        state.value.currencies
+    val compressResult = remember(state.value.results) {
+        state.value.results
+    }
+    val lastTime = remember(state.value.lastTime) {
+        state.value.lastTime
     }
     Column {
-        val coroutineScope = rememberCoroutineScope()
         val listState = rememberLazyListState()
-        PostList(
+        CompressResultList(
             modifier = Modifier.weight(1f),
-            currencies = currencies,
-            listState = listState
+            compressResult = compressResult,
+            listState = listState,
+            lastTime = lastTime
         ) { currency -> onPostClick(currency) }
         Spacer(
             Modifier

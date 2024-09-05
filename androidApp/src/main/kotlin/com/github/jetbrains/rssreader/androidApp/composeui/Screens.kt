@@ -1,5 +1,6 @@
 package com.github.jetbrains.rssreader.androidApp.composeui
 
+import android.util.Log
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.material.ExperimentalMaterialApi
@@ -16,6 +17,8 @@ import androidx.compose.ui.platform.LocalContext
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
+import com.github.jetbrains.rssreader.R
+import com.github.jetbrains.rssreader.androidApp.utils.readTextFileFromRaw
 import com.github.jetbrains.rssreader.app.CurrencyAction
 import com.github.jetbrains.rssreader.app.CurrencyStore
 import com.github.jetbrains.rssreader.app.FeedStore
@@ -24,7 +27,7 @@ import org.koin.core.component.inject
 
 class MainScreen : Screen, KoinComponent {
     private val symbol = "BTCUSDT"
-    private val interval = 4
+    private val interval = 1
 
     @OptIn(ExperimentalMaterialApi::class)
     @Composable
@@ -39,6 +42,13 @@ class MainScreen : Screen, KoinComponent {
         )
 
         LaunchedEffect(Unit) {
+            val lines = if (interval == 1)
+                readTextFileFromRaw(context, R.raw.candle_sticks_1h)
+            else if (interval == 4)
+                readTextFileFromRaw(context, R.raw.candle_sticks_4h)
+            else
+                emptyList()
+            currencyStore.dispatch(CurrencyAction.ReadFileData(lines))
             currencyStore.dispatch(CurrencyAction.Refresh(symbol, interval))
         }
         Box(modifier = Modifier.pullRefresh(refreshState)) {

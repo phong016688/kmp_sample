@@ -41,6 +41,7 @@ kotlin {
             api(libs.koin.core)
             // Date format
             implementation(libs.kotlinx.datetime)
+            // Ktor
             implementation(libs.ktor.client.content.negotiation)
             implementation(libs.ktor.serialization.kotlinx.json)
         }

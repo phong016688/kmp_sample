@@ -2,6 +2,7 @@ package com.github.jetbrains.rssreader.androidApp.composeui
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
+import com.github.jetbrains.rssreader.core.entity.CompressResult
 import com.github.jetbrains.rssreader.core.entity.Currency
 import com.github.jetbrains.rssreader.core.entity.Feed
 import com.github.jetbrains.rssreader.core.entity.Post
@@ -18,7 +19,7 @@ private fun FeedItemPreview() {
 @Composable
 private fun PostPreview() {
     AppTheme {
-        PostItem(item = PreviewData.currency, onClick = {})
+        PostItem(item = PreviewData.compressResult, lastTime = 0, onClick = {})
     }
 }
 
@@ -46,7 +47,8 @@ private object PreviewData {
         link = "https://blog.jetbrains.com/kotlin/2020/11/productive-server-side-development-with-kotlin-stories/",
         date = 42L
     )
-    val currency = Currency(0,0.0,0.0,0.0,0.0,0.0,0,0.0,0.0,0.0,0.0,0.0)
+    val currency = Currency(0, 0.0, 0.0, 0.0, 0.0, 0.0, 0, 0.0, 0.0, 0.0, 0.0, 0.0)
+    val compressResult = CompressResult(0.0, 0.0, 12313131313131)
     val feed = Feed(
         title = "Kotlin Blog",
         link = "blog.jetbrains.com/kotlin/",

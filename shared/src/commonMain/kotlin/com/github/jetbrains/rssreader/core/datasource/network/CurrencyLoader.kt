@@ -25,7 +25,7 @@ internal class CurrencyLoader(private val httpClient: HttpClient) {
             parameter("symbol", symbol)
             parameter("interval", "${interval}h")
             parameter("startTime", startTime)
-            parameter("limit", 1000)
+            parameter("limit", 24)
         }
     }
 
