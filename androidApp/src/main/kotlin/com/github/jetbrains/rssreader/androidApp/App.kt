@@ -3,7 +3,6 @@ package com.github.jetbrains.rssreader.androidApp
 import android.app.Application
 import com.github.jetbrains.rssreader.androidApp.sync.RefreshWorker
 import com.github.jetbrains.rssreader.app.CurrencyStore
-import com.github.jetbrains.rssreader.app.FeedStore
 import com.github.jetbrains.rssreader.core.CurrencyReader
 import com.github.jetbrains.rssreader.core.RssReader
 import com.github.jetbrains.rssreader.core.create
@@ -22,8 +21,6 @@ class App : Application() {
     }
 
     private val appModule = module {
-        single { RssReader.create(get(), BuildConfig.DEBUG) }
-        single { FeedStore(get()) }
         single { CurrencyReader.create(get(), BuildConfig.DEBUG) }
         single { CurrencyStore(get()) }
     }

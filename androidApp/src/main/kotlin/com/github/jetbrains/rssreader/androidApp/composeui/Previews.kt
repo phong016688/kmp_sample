@@ -7,13 +7,6 @@ import com.github.jetbrains.rssreader.core.entity.Currency
 import com.github.jetbrains.rssreader.core.entity.Feed
 import com.github.jetbrains.rssreader.core.entity.Post
 
-@Preview
-@Composable
-private fun FeedItemPreview() {
-    AppTheme {
-        FeedItem(feed = PreviewData.feed) {}
-    }
-}
 
 @Preview
 @Composable
@@ -23,20 +16,11 @@ private fun PostPreview() {
     }
 }
 
-@Preview
-@Composable
-private fun FeedIconPreview() {
-    AppTheme {
-        FeedIcon(feed = PreviewData.feed)
-    }
-}
 
 @Preview
 @Composable
 private fun FeedIconSelectedPreview() {
-    AppTheme {
-        FeedIcon(feed = PreviewData.feed, true)
-    }
+    AppTheme {}
 }
 
 private object PreviewData {

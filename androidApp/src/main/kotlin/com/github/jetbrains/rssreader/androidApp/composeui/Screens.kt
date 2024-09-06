@@ -1,6 +1,5 @@
 package com.github.jetbrains.rssreader.androidApp.composeui
 
-import android.util.Log
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.material.ExperimentalMaterialApi
@@ -17,18 +16,12 @@ import androidx.compose.ui.platform.LocalContext
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
-import com.github.jetbrains.rssreader.R
-import com.github.jetbrains.rssreader.androidApp.utils.readTextFileFromRaw
 import com.github.jetbrains.rssreader.app.CurrencyAction
 import com.github.jetbrains.rssreader.app.CurrencyStore
-import com.github.jetbrains.rssreader.app.FeedStore
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
 class MainScreen : Screen, KoinComponent {
-    private val symbol = "BTCUSDT"
-    private val interval = 1
-
     @OptIn(ExperimentalMaterialApi::class)
     @Composable
     override fun Content() {
@@ -38,18 +31,11 @@ class MainScreen : Screen, KoinComponent {
         val state by currencyStore.observeState().collectAsState()
         val refreshState = rememberPullRefreshState(
             refreshing = state.progress,
-            onRefresh = { currencyStore.dispatch(CurrencyAction.Refresh(symbol, interval)) }
+            onRefresh = { currencyStore.dispatch(CurrencyAction.Refresh(state.setting)) }
         )
-
         LaunchedEffect(Unit) {
-            val lines = if (interval == 1)
-                readTextFileFromRaw(context, R.raw.candle_sticks_1h)
-            else if (interval == 4)
-                readTextFileFromRaw(context, R.raw.candle_sticks_4h)
-            else
-                emptyList()
-            currencyStore.dispatch(CurrencyAction.ReadFileData(lines))
-            currencyStore.dispatch(CurrencyAction.Refresh(symbol, interval))
+            currencyStore.dispatch(CurrencyAction.Refresh(state.setting))
+            currencyStore.dispatch(CurrencyAction.CalcSettingChange(state.calcSetting))
         }
         Box(modifier = Modifier.pullRefresh(refreshState)) {
             MainFeed(
@@ -68,12 +54,6 @@ class MainScreen : Screen, KoinComponent {
             )
         }
     }
-}
 
-class FeedListScreen : Screen, KoinComponent {
-    @Composable
-    override fun Content() {
-        val store: FeedStore by inject()
-        FeedList(store = store)
-    }
+
 }

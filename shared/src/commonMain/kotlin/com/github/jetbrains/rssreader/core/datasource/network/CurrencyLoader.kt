@@ -11,21 +11,22 @@ import io.ktor.http.takeFrom
 import kotlinx.datetime.Clock
 
 internal class CurrencyLoader(private val httpClient: HttpClient) {
-    suspend fun getCurrencyInDay(symbol: String, interval: Int): List<Currency> {
-        return httpClient.get { getKLine(symbol, interval) }
+    suspend fun getCurrencyInDay(symbol: String, interval: Int, length: Int): List<Currency> {
+        return httpClient.get { getKLine(symbol, interval, length) }
             .body<List<List<Double>>>()
             .map { it.toCurrency() }
     }
 
-    private fun HttpRequestBuilder.getKLine(symbol: String, interval: Int) {
-        val startTime = Clock.System.now().toEpochMilliseconds() - 24 * 60 * 60 * 1000
+    private fun HttpRequestBuilder.getKLine(symbol: String, interval: Int, length: Int) {
+        val now = Clock.System.now().toEpochMilliseconds()
+        val startTime = now - length * interval * 60 * 60 * 1000
         url {
             takeFrom("https://api.binance.com/")
             path("api/v3/klines")
             parameter("symbol", symbol)
             parameter("interval", "${interval}h")
             parameter("startTime", startTime)
-            parameter("limit", 24)
+            parameter("limit", length)
         }
     }
 

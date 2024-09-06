@@ -9,8 +9,8 @@ class CurrencyReader internal constructor(
     private val currencyStorage: CurrencyStorage
 ) {
     @Throws(Exception::class)
-    suspend fun getCurrencyInDay(symbol: String, interval: Int): List<Currency> {
-        return currencyLoader.getCurrencyInDay(symbol, interval)
+    suspend fun getCurrencyInDay(symbol: String, interval: Int, length: Int): List<Currency> {
+        return currencyLoader.getCurrencyInDay(symbol, interval, length)
     }
 
     companion object
