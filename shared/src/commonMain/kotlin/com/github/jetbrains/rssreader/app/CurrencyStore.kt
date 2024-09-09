@@ -43,10 +43,13 @@ data class CurrencyState(
     }
 }
 
+data class ChartState(val current: List<Currency>, val next: List<Currency>) : State
+
 sealed class CurrencyAction : Action {
     data class Refresh(val setting: CompressSetting) : CurrencyAction()
     data class SampleDataChange(val strings: List<String>) : CurrencyAction()
     data class CalcSettingChange(val calcSetting: CalculatorSetting) : CurrencyAction()
+    data class GetHistoryChartData(val startTime: Long) : CurrencyAction()
 }
 
 sealed class CurrencySideEffect : Effect {
@@ -60,6 +63,7 @@ class CurrencyStore(
     CoroutineScope by CoroutineScope(Dispatchers.Main) {
 
     private val state = MutableStateFlow(CurrencyState.Initial)
+    private val chartState = MutableStateFlow(ChartState(emptyList(), emptyList()))
     private val sideEffect = MutableSharedFlow<CurrencySideEffect>()
     private val actionState = MutableSharedFlow<Action>()
 
@@ -67,16 +71,13 @@ class CurrencyStore(
         actionState.filterIsInstance<CurrencyAction.Refresh>()
             .map { it.setting.interval }
             .distinctUntilChanged()
-            .onEach {
-                emitSideEffect(CurrencySideEffect.ReloadSampleData(it))
-                Napier.d(tag = "#####2ReloadSampleData", message = "interval: ${it}")
-            }.launchIn(this)
+            .onEach { emitSideEffect(CurrencySideEffect.ReloadSampleData(it)) }
+            .launchIn(this)
         val allCurrencies = actionState.filterIsInstance<CurrencyAction.SampleDataChange>()
             .map { it.strings }
             .distinctUntilChanged()
             .map { prepareDataFromFile(it) }
             .filter { it.isNotEmpty() }
-            .onEach { Napier.d(tag = "#####2allCurrencies", message = "size: ${it.size}") }
         val currenciesInDay = actionState.filterIsInstance<CurrencyAction.Refresh>()
             .map { it.setting }
             .distinctUntilChanged()
@@ -85,22 +86,39 @@ class CurrencyStore(
             .filter { it.isNotEmpty() }
             .onEach { processState { copy(lastTime = it.first().openTime) } }
             .catch { emitSideEffect(CurrencySideEffect.Error(Exception(it))) }
-            .onEach { Napier.d(tag = "#####2currenciesInDay", message = "size: ${it.size}") }
         val typeChange = actionState.filterIsInstance<CurrencyAction.CalcSettingChange>()
             .onEach { processState { copy(calcSetting = it.calcSetting) } }
             .map { it.calcSetting.type }
             .distinctUntilChanged()
-            .onEach { Napier.d(tag = "#####2typeChange", message = "type: ${it}") }
         combine(allCurrencies, currenciesInDay, typeChange) { all, day, type ->
             runCatching {
                 val results = CompressAlgorithm.compress(all, day, type)
                 processState { CurrencyState(false, results, lastTime, setting, calcSetting) }
-                Napier.d(tag = "#####2combine", message = "results: ${results.size}")
             }.onFailure {
                 emitSideEffect(CurrencySideEffect.Error(Exception(it)))
             }
         }.launchIn(this)
+        actionState.filterIsInstance<CurrencyAction.GetHistoryChartData>()
+            .map { it.startTime }
+            .combine(allCurrencies) { startTime, all ->
+                val length = state.value.setting.length
+                val index = all.indexOfFirst { it.openTime == startTime }
+                if (index == -1) {
+                    emptyList<Currency>() to emptyList<Currency>()
+                } else {
+                    val current = all.subList(index, index + length)
+                    val next = all.subList(index + length, index + length * 3)
+                    current to next
+                }
+            }
+            .onEach {
+                val newValue = chartState.value.copy(current = it.first, next = it.second)
+                chartState.value = newValue
+            }
+            .launchIn(this)
     }
+
+    fun observeChartState(): StateFlow<ChartState> = chartState
 
     override fun observeState(): StateFlow<CurrencyState> = state
 

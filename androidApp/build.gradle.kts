@@ -90,5 +90,7 @@ android {
         implementation(libs.voyager.navigator)
         //WorkManager
         implementation(libs.work.runtime.ktx)
+        //Constraintlayout
+        implementation(libs.androidx.constraintlayout.compose)
     }
 }

@@ -12,7 +12,7 @@ import com.github.jetbrains.rssreader.core.entity.Post
 @Composable
 private fun PostPreview() {
     AppTheme {
-        PostItem(item = PreviewData.compressResult, lastTime = 0, onClick = {})
+        CompressResultItem(item = PreviewData.compressResult, lastTime = 0, total = 10,onClick = {})
     }
 }
 

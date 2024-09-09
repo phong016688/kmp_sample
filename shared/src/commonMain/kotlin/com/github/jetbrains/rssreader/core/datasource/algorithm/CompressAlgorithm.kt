@@ -8,6 +8,7 @@ import kotlin.math.pow
 import kotlin.math.sqrt
 
 object CompressAlgorithm {
+    private const val MAX_LIST_SIZE = 1141280
 
     private fun euclideanDistance(
         sequenceA: List<CompressItem>,
@@ -38,6 +39,7 @@ object CompressAlgorithm {
         val originalPrice = startPoint.lowPrice
         val frameSize = dayCurrencies.size
         val currenciesFrame = allCurrencies
+            .takeLast(MAX_LIST_SIZE / frameSize)
             .windowed(size = frameSize, step = 1)
             .map { it.standardizationData(originalPrice) }
         val allItemsFrame = currenciesFrame.map { it.mapToCompressItem(compressType) }

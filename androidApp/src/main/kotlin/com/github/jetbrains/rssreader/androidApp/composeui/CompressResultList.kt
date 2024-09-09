@@ -23,6 +23,7 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.github.jetbrains.rssreader.core.entity.CompressResult
@@ -45,7 +46,7 @@ fun CompressResultList(
     ) {
         itemsIndexed(compressResult) { i, result ->
             if (i == 0) Spacer(Modifier.windowInsetsTopHeight(WindowInsets.statusBars))
-            PostItem(result, lastTime) { onClick(result) }
+            CompressResultItem(result, lastTime, compressResult.size) { onClick(result) }
             if (i != compressResult.size - 1) Spacer(modifier = Modifier.size(16.dp))
         }
     }
@@ -54,9 +55,10 @@ fun CompressResultList(
 private val dateFormatter = SimpleDateFormat("HH:dd/MM/yyyy", Locale.getDefault())
 
 @Composable
-fun PostItem(
+fun CompressResultItem(
     item: CompressResult,
     lastTime: Long,
+    total: Int,
     onClick: () -> Unit,
 ) {
     val padding = 8.dp
@@ -102,7 +104,8 @@ fun PostItem(
                         style = MaterialTheme.typography.h6,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
-                        text = String.format(Locale.getDefault(), "%.2f", item.distance)
+                        color = getDistanceColor(item, total),
+                        text = String.format(Locale.getDefault(), "%.2f", item.distance / total)
                     )
                     Text(
                         modifier = Modifier.padding(start = padding, end = padding),
@@ -117,3 +120,9 @@ fun PostItem(
         }
     }
 }
+
+@Composable
+private fun getDistanceColor(
+    item: CompressResult,
+    total: Int
+) = if (item.distance / total < 10) Color(201, 56, 42, 255) else Color.Black

@@ -18,7 +18,7 @@ import com.github.jetbrains.rssreader.core.entity.CompressType
 @Composable
 fun MainFeed(
     store: CurrencyStore,
-    onPostClick: (CompressResult) -> Unit,
+    onCompressResultClick: (CompressResult) -> Unit,
 ) {
     val state = store.observeState().collectAsState()
     val compressResult = remember(state.value.results) {
@@ -42,7 +42,7 @@ fun MainFeed(
                 compressResult = compressResult,
                 listState = listState,
                 lastTime = lastTime
-            ) { currency -> onPostClick(currency) }
+            ) { currency -> onCompressResultClick(currency) }
             MainFeedBottomBar(
                 setting = setting,
                 calcSetting = calcSetting,
@@ -106,7 +106,7 @@ sealed class SettingIcons {
         }
     }
 
-    data class Length(val data: List<Int> = listOf(12, 16, 20, 24, 28, 32, 36)) : SettingIcons() {
+    data class Length(val data: List<Int> = listOf(12, 24, 36, 48, 60, 72)) : SettingIcons() {
         override fun strings(): List<String> {
             return data.map { it.toString() }
         }
